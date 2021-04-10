@@ -19,7 +19,6 @@ class Cell:
     def __init__(self, x, y, num):
         self.x = x
         self.y = y
-        self.is_filled = False
         self.num = num
 
 
@@ -32,7 +31,7 @@ def initialBoard():
 
 
 def decideLocation():
-    firstNum = 4
+    firstNum = 2
     while firstNum > 0:
         randomX = random.randint(0, 3)
         randomY = random.randint(0, 3)
@@ -43,7 +42,7 @@ def decideLocation():
 
 
 def firstSet():
-    randomNumber = random.randint(3, 4)
+    randomNumber = random.randint(0, 4)
     if randomNumber == 4:
         return "4"
     else:
@@ -85,7 +84,29 @@ def set_number(num, x, y):
     canvas.create_rectangle(center_x - SQUARE_LENGTH / 2, center_y - SQUARE_LENGTH / 2,
                             center_x + SQUARE_LENGTH / 2, center_y + SQUARE_LENGTH / 2, fill=CELL_COLOR, width=0)
     canvas.create_text(center_x, center_y, text=num,
-                       justify="center", font=("", 70), tag="count_text")
+                       justify="center", font=("", 50), tag="count_text")
+
+
+def setNum(col, colList):
+    for row in range(4):
+        gameCells[4 * col + row].num = colList[row]
+
+
+def changeBlocks(colList, direction):
+    for row in range(4):
+        if colList[row] != "" and not checkFillList(colList) and row > int(findEmpty(colList, direction)):
+            colList[row], colList[findEmpty(colList, direction)] = colList[findEmpty(
+                colList, direction)], colList[row]
+
+
+def moveNumber(direction):
+    for col in range(4):
+        colList = []
+        for row in range(4):
+            colList.append(gameCells[4 * col + row].num)
+            changeBlocks(colList, direction)
+            addNumber(colList, direction)
+            setNum(col, colList)
 
 
 def operate(event):
@@ -98,9 +119,10 @@ def operate(event):
             print(colList)
             for row in range(4):
                 if colList[row] != "":
-                    emptyBlockNumber = int(findEmpty(colList, "Left"))
-                    if row > emptyBlockNumber:
-                        colList[row], colList[emptyBlockNumber] = colList[emptyBlockNumber], colList[row]
+                    if not checkFillList(colList):
+                        emptyBlockNumber = int(findEmpty(colList, "Left"))
+                        if row > emptyBlockNumber:
+                            colList[row], colList[emptyBlockNumber] = colList[emptyBlockNumber], colList[row]
             print(colList)
             addNumber(colList, "Left")
             # initialBoard()
@@ -114,9 +136,10 @@ def operate(event):
             print(colList)
             for row in range(4):
                 if colList[3-row] != "":
-                    emptyBlockNumber = int(findEmpty(colList, "Right"))
-                    if 3-row < emptyBlockNumber:
-                        colList[3-row], colList[emptyBlockNumber] = colList[emptyBlockNumber], colList[3-row]
+                    if not checkFillList(colList):
+                        emptyBlockNumber = int(findEmpty(colList, "Right"))
+                        if 3-row < emptyBlockNumber:
+                            colList[3-row], colList[emptyBlockNumber] = colList[emptyBlockNumber], colList[3-row]
             print(colList)
             addNumber(colList, "Right")
             # initialBoard()
@@ -130,9 +153,10 @@ def operate(event):
             print(rowList)
             for col in range(4):
                 if rowList[col] != "":
-                    emptyBlockNumber = int(findEmpty(rowList, "Up"))
-                    if col > emptyBlockNumber:
-                        rowList[col], rowList[emptyBlockNumber] = rowList[emptyBlockNumber], rowList[col]
+                    if not checkFillList(rowList):
+                        emptyBlockNumber = int(findEmpty(rowList, "Up"))
+                        if col > emptyBlockNumber:
+                            rowList[col], rowList[emptyBlockNumber] = rowList[emptyBlockNumber], rowList[col]
             print(rowList)
             addNumber(rowList, "Up")
             # initialBoard()
@@ -146,9 +170,10 @@ def operate(event):
             print(rowList)
             for col in range(4):
                 if rowList[3-col] != "":
-                    emptyBlockNumber = int(findEmpty(rowList, "Down"))
-                    if 3-col < emptyBlockNumber:
-                        rowList[3-col], rowList[emptyBlockNumber] = rowList[emptyBlockNumber], rowList[3-col]
+                    if not checkFillList(rowList):
+                        emptyBlockNumber = int(findEmpty(rowList, "Down"))
+                        if 3-col < emptyBlockNumber:
+                            rowList[3-col], rowList[emptyBlockNumber] = rowList[emptyBlockNumber], rowList[3-col]
             print(rowList)
             addNumber(rowList, "Down")
             # initialBoard()
@@ -159,10 +184,19 @@ def operate(event):
         set_number(gameCell.num, gameCell.x, gameCell.y)
 
 
+def checkFillList(checkList):
+    for ele in checkList:
+        if ele == "":
+            return False
+            break
+    return True
+
+
 def addNumber(cellList, direction):
     if direction == "Left" or direction == "Up":
         for row in range(3):
             if cellList[row] == cellList[row + 1] and cellList[row] != "":
+                print("-------")
                 addNum = int(cellList[row]) * 2
                 cellList[row] = str(addNum)
                 cellList[row + 1] = ""
@@ -210,7 +244,7 @@ def fillNumber():
         fillX = random.randint(0, 3)
         fillY = random.randint(0, 3)
         if gameCells[fillX + 4 * fillY].num == "":
-            gameCells[fillX + 4 * fillY].num = newNumber
+            gameCells[fillX + 4 * fillY].num = str(newNumber)
             break
 
 
